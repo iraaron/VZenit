@@ -18,7 +18,10 @@ struct VZenitApp: App {
                 .environmentObject(midi)
                 .environmentObject(updateChecker)
                 .frame(minWidth: 1000, minHeight: 700)
-                .task { updateChecker.checkIfDue() }
+                .onAppear {
+                    NSLog("[VZenit] VZenitApp.onAppear firing UpdateChecker")
+                    updateChecker.checkIfDue()
+                }
         }
         .windowStyle(.titleBar)
         .windowToolbarStyle(.unified(showsTitle: true))

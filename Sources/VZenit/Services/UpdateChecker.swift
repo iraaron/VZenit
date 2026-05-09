@@ -26,20 +26,25 @@ final class UpdateChecker: ObservableObject {
 
     /// Trigger a check if enough time has passed since the last one (called on launch).
     func checkIfDue() {
+        NSLog("[VZenit] UpdateChecker.checkIfDue entered")
         let lastCheck = UserDefaults.standard.object(forKey: lastCheckKey) as? Date
         if let lastCheck, Date().timeIntervalSince(lastCheck) < minCheckInterval {
+            NSLog("[VZenit] UpdateChecker.checkIfDue skipped — last ran \(lastCheck)")
             logger.debug("Skipping update check — last ran \(lastCheck)")
             return
         }
+        NSLog("[VZenit] UpdateChecker.checkIfDue spawning Task")
         Task { await self.check() }
     }
 
     /// Force a check regardless of rate limit, with user-visible feedback (called from Help menu).
     func checkManually() {
+        NSLog("[VZenit] UpdateChecker.checkManually invoked")
         Task { await self.check(triggeredManually: true) }
     }
 
     func check(triggeredManually: Bool = false) async {
+        NSLog("[VZenit] UpdateChecker.check entered (manual=\(triggeredManually))")
         UserDefaults.standard.set(Date(), forKey: lastCheckKey)
 
         var request = URLRequest(url: releasesURL, timeoutInterval: 8)
@@ -47,7 +52,9 @@ final class UpdateChecker: ObservableObject {
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
 
         do {
+            NSLog("[VZenit] UpdateChecker.check awaiting URLSession")
             let (data, response) = try await URLSession.shared.data(for: request)
+            NSLog("[VZenit] UpdateChecker.check got response status=\((response as? HTTPURLResponse)?.statusCode ?? -1)")
             guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
                 logger.warning("Update check non-200 response")
                 if triggeredManually {
@@ -58,11 +65,13 @@ final class UpdateChecker: ObservableObject {
             let release = try JSONDecoder().decode(GitHubRelease.self, from: data)
             let latestVersion = Self.stripVPrefix(release.tag_name)
 
+            NSLog("[VZenit] UpdateChecker.check comparing latest=\(latestVersion) vs current=\(Self.currentVersion)")
             if Self.compareVersions(latestVersion, Self.currentVersion) == .orderedDescending {
                 availableUpdate = UpdateInfo(
                     version: latestVersion,
                     url: URL(string: release.html_url) ?? releasesURL
                 )
+                NSLog("[VZenit] UpdateChecker.check set availableUpdate to \(latestVersion)")
                 logger.info("Update available: \(latestVersion)")
                 // No alert — the banner handles this case.
             } else {
