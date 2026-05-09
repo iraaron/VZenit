@@ -35,6 +35,23 @@ open VZenit.xcodeproj
 
 In Xcode, set your Team under **Signing & Capabilities**, then **⌘R**. Full walkthrough in [SETUP.md](SETUP.md).
 
+## Building a distributable for testers
+
+To produce an ad-hoc-signed `.app` zipped up for sharing:
+
+```bash
+./scripts/release.sh
+# → dist/VZenit-<version>.zip
+```
+
+The recipient (who doesn't have Xcode) clears the quarantine attribute and runs it:
+
+```bash
+xattr -cr ~/Downloads/VZenit.app && open ~/Downloads/VZenit.app
+```
+
+Or in Finder: right-click → **Open** → confirm the Gatekeeper dialog.
+
 ## Project layout
 
 ```
@@ -42,6 +59,8 @@ VZenit/
 ├── README.md                 ← you are here
 ├── SETUP.md                  ← detailed setup walkthrough
 ├── project.yml               ← XcodeGen spec — single source of truth
+├── scripts/
+│   └── release.sh            ← one-shot build + zip for distribution
 ├── Sources/VZenit/
 │   ├── App/                  ← @main entry point + root view
 │   ├── Models/               ← 336-byte voice model, SysEx codec, randomizer, library

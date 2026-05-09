@@ -22,6 +22,9 @@ xcuserdata/
 # Xcode — build artifacts
 build/
 DerivedData/
+
+# Distribution zips produced by scripts/release.sh
+dist/
 *.hmap
 *.ipa
 *.dSYM.zip
