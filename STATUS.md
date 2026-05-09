@@ -90,6 +90,11 @@
 - Verified to build cleanly with `xcodebuild` (only deprecation warnings around legacy `onChange(of:perform:)` calls in `ContentView.swift`)
 - MIT license, public repo at https://github.com/iraaron/VZenit
 
+### Tests (`Tests/VZenitTests/`)
+- `VZenitTests` XCTest bundle target wired up via `project.yml`
+- 21 tests covering: dump-request frames, encode framing, encode-decode-encode byte idempotence, custom name + waveform + line-mode + octave + master-level round-trips, multi-message stream extraction, decode error paths
+- Caught two real issues during test authoring (see notes below)
+
 ---
 
 ## 🔲 Not Yet Started
@@ -103,8 +108,9 @@
 | **Patch compare / morph** | Side-by-side diff or parameter interpolation between two patches |
 | **Randomizer** | Constrained random patch generation |
 | **Accessibility** | VoiceOver labels, keyboard navigation for all controls |
-| **Unit tests** | SysEx round-trip tests, bit-mask regression tests |
 | **App icon** | Design and asset catalog |
+| **Reconcile model defaults vs wire format** | Default `dcoPitchEnvelope.depth = 99` and key-follow values of 99 get clamped to 35 on encode (6-bit field on the pitch path). Either tighten model defaults to match the wire format, or normalise on decode. Encode is idempotent at the byte level — no data loss across save/load — but full struct equality across a round-trip currently fails. |
+| **Reconcile envelope `isEnd` flag** | Decoder marks the step at `endStep` with `isEnd = true`; default constructor doesn't. Same idempotence story as above. |
 | **Modernise `onChange` in ContentView** | Migrate from deprecated `onChange(of:perform:)` to two-arg form (warnings only, not blocking) |
 | **VZ-8M verification** | Confirm operation data format differences vs VZ-1/10M |
 
@@ -119,26 +125,28 @@ VZenit/
 ├── SETUP.md                               ← detailed setup walkthrough
 ├── LICENSE                                ← MIT
 ├── project.yml                            ← XcodeGen spec
-└── Sources/VZenit/
-    ├── App/
-    │   ├── VZenitApp.swift               ✅ @main, menus, notifications
-    │   └── ContentView.swift               ✅ root 3-panel layout
-    ├── Models/
-    │   ├── VZVoicePatch.swift              ✅ 336-byte voice data model
-    │   ├── VZSysEx.swift                   ✅ bit-accurate encode/decode
-    │   └── VZLibrary.swift                 ✅ JSON library + .syx import/export
-    ├── MIDI/
-    │   └── MIDIManager.swift               ✅ CoreMIDI wrapper + SysEx streaming
-    └── Views/
-        ├── VoiceEditorView.swift           ✅ routing diagram + DCO/DCA editors
-        └── EnvelopeEditorView.swift        ✅ canvas envelope + key follow
+├── Sources/VZenit/
+│   ├── App/
+│   │   ├── VZenitApp.swift                ✅ @main, menus, notifications
+│   │   └── ContentView.swift              ✅ root 3-panel layout
+│   ├── Models/
+│   │   ├── VZVoicePatch.swift             ✅ 336-byte voice data model
+│   │   ├── VZSysEx.swift                  ✅ bit-accurate encode/decode
+│   │   └── VZLibrary.swift                ✅ JSON library + .syx import/export
+│   ├── MIDI/
+│   │   └── MIDIManager.swift              ✅ CoreMIDI wrapper + SysEx streaming
+│   └── Views/
+│       ├── VoiceEditorView.swift          ✅ routing diagram + DCO/DCA editors
+│       └── EnvelopeEditorView.swift       ✅ canvas envelope + key follow
+└── Tests/VZenitTests/
+    └── VZSysExTests.swift                 ✅ 21 codec tests
 ```
 
 ---
 
 ## Next Session Suggested Starting Points
 
-1. **Create the Xcode project** — follow SETUP.md, add all source files, verify it compiles
-2. **Operation Editor** — the operation SysEx format is structurally similar to voice; `VZ operation creation.txt` in the reference repo has the spec
+1. **Operation Editor** — the operation SysEx format is structurally similar to voice; `VZ operation creation.txt` in the reference repo has the spec
+2. **Reconcile model defaults vs wire format** — the open issue surfaced by the test suite (see Not Yet Started)
 3. **On-screen keyboard** — straightforward SwiftUI Canvas + CoreMIDI note-on/off
 4. **Unit tests** — write `VZSysExTests` covering encode → decode round-trips for known patches

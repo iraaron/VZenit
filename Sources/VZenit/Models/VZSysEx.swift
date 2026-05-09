@@ -54,13 +54,16 @@ struct VZSysEx {
 
     // MARK: - Frame helpers
 
-    /// Build a dump-request frame (sent to synth to trigger a voice dump)
+    /// Build a dump-request frame (sent to synth to trigger a voice dump).
+    /// The request command byte is the dump command plus the request prefix —
+    /// addition, not bitwise OR, because bit 4 is set in both `cmdVoice` (0x70)
+    /// and `cmdRequest` (0x10), so OR would collide with `cmdVoice` itself.
     static func voiceDumpRequest(channel: UInt8 = 0) -> [UInt8] {
-        [startByte, manufacturerID, channel & 0x0F, subID, cmdRequest | cmdVoice, endByte]
+        [startByte, manufacturerID, channel & 0x0F, subID, cmdVoice + cmdRequest, endByte]
     }
 
     static func operationDumpRequest(channel: UInt8 = 0) -> [UInt8] {
-        [startByte, manufacturerID, channel & 0x0F, subID, cmdRequest | cmdOperation, endByte]
+        [startByte, manufacturerID, channel & 0x0F, subID, cmdOperation + cmdRequest, endByte]
     }
 
     // MARK: - Decode

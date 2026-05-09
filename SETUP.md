@@ -134,7 +134,7 @@ F0  44  CH  00  70  [336 data bytes]  F7
 
 To request a dump from the synth:
 ```
-F0  44  CH  00  80  F7    (0x10 | 0x70 = 0x80)
+F0  44  CH  00  80  F7    (cmdVoice 0x70 + request prefix 0x10 = 0x80)
 ```
 
 ---
