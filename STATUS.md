@@ -1,6 +1,7 @@
 # VZenit — Project Status
 
-**Last updated:** 2026-05-09 (model defaults reconciled)  
+**Last updated:** 2026-05-09  
+**Latest release:** [v0.0.1](https://github.com/iraaron/VZenit/releases/tag/v0.0.1) — first preview (prerelease, hardware-untested)  
 **Target platform:** macOS 14+ (native Swift/SwiftUI)  
 **Synths supported:** Casio VZ-1, VZ-10M, VZ-8M
 
