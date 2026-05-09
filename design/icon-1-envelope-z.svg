@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="512" height="512">
+  <!-- Background: solid dark, no gradient -->
+  <rect x="0" y="0" width="1024" height="1024" rx="224" ry="224" fill="#0e1622"/>
+
+  <!-- Top bar: solid filled rectangle, edge to edge -->
+  <rect x="160" y="232" width="704" height="56" rx="8" ry="8" fill="#4ad8b0"/>
+
+  <!-- Bottom bar -->
+  <rect x="160" y="736" width="704" height="56" rx="8" ry="8" fill="#4ad8b0"/>
+
+  <!-- Sustain plateau: one short horizontal segment connecting two adjacent dots -->
+  <line x1="500" y1="488" x2="600" y2="488"
+        stroke="#4ad8b0" stroke-width="14" stroke-linecap="round"/>
+
+  <!-- 7 envelope step dots traversing the diagonal, top-right to bottom-left -->
+  <g fill="#4ad8b0">
+    <circle cx="760" cy="368" r="22"/>
+    <circle cx="680" cy="428" r="22"/>
+    <circle cx="600" cy="488" r="22"/>
+    <circle cx="500" cy="488" r="22"/>
+    <circle cx="408" cy="552" r="22"/>
+    <circle cx="320" cy="612" r="22"/>
+    <circle cx="232" cy="672" r="22"/>
+  </g>
+</svg>

@@ -30,6 +30,7 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: VZenit
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.music
         INFOPLIST_KEY_NSHumanReadableCopyright: "Copyright © 2026 Aaron Thornton"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     entitlements:
       path: VZenit.entitlements
       properties:
