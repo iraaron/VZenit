@@ -66,10 +66,10 @@ struct ContentView: View {
         ) { result in
             if case .failure(let err) = result { alertMessage = err.localizedDescription }
         }
-        .onChange(of: selectedPatchID) { id in
+        .onChange(of: selectedPatchID) { _, id in
             if let id, let p = library.patch(id: id) { editingPatch = p }
         }
-        .onChange(of: midi.receivedPatch) { patch in
+        .onChange(of: midi.receivedPatch) { _, patch in
             guard let patch else { return }
             editingPatch = patch
         }
@@ -170,11 +170,11 @@ struct ContentView: View {
                 )
             }
         }
-        .onChange(of: editingPatch) { patch in
+        .onChange(of: editingPatch) { _, patch in
             guard autoUpdate, let patch else { return }
             midi.sendVoice(patch)
-            // Push changes back to library
-            if let id = selectedPatchID { library.update(patch) }
+            // Push changes back to library if a patch is selected there
+            if selectedPatchID != nil { library.update(patch) }
         }
     }
 
@@ -191,9 +191,8 @@ struct ContentView: View {
 
         ToolbarItem(placement: .primaryAction) {
             Button {
-                guard let patch = editingPatch, let id = selectedPatchID else { return }
-                var updated = patch
-                library.update(updated)
+                guard let patch = editingPatch, selectedPatchID != nil else { return }
+                library.update(patch)
             } label: {
                 Label("Save to Library", systemImage: "square.and.arrow.down")
             }

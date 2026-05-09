@@ -86,8 +86,8 @@
 - Architecture rationale table
 
 ### Build (`project.yml`, MIT `LICENSE`)
-- XcodeGen spec defines the macOS 14+ app target, bundle ID `io.github.iraaron.VZenit`, App Sandbox + USB + Audio Input entitlements
-- Verified to build cleanly with `xcodebuild` (only deprecation warnings around legacy `onChange(of:perform:)` calls in `ContentView.swift`)
+- XcodeGen spec defines the macOS 14+ app target, bundle ID `io.github.iraaron.VZenit`, App Sandbox + USB + Audio Input + user-selected files entitlements
+- Builds cleanly via `xcodebuild` — no source-code warnings
 - MIT license, public repo at https://github.com/iraaron/VZenit
 
 ### Tests (`Tests/VZenitTests/`)
@@ -116,7 +116,6 @@
 | **Randomizer** | Constrained random patch generation |
 | **Accessibility** | VoiceOver labels, keyboard navigation for all controls |
 | **App icon** | Design and asset catalog |
-| **Modernise `onChange` in ContentView** | Migrate from deprecated `onChange(of:perform:)` to two-arg form (warnings only, not blocking) |
 | **VZ-8M verification** | Confirm operation data format differences vs VZ-1/10M |
 
 ---
@@ -152,6 +151,6 @@ VZenit/
 ## Next Session Suggested Starting Points
 
 1. **Operation Editor** — the operation SysEx format is structurally similar to voice; `VZ operation creation.txt` in the reference repo has the spec
-2. **Modernise `onChange(of:perform:)` in `ContentView.swift`** — kills the three deprecation warnings; ~10-minute task
+2. **Patch compare / morph / randomizer** — pure parameter operations, no synth needed
 3. **On-screen keyboard** — straightforward SwiftUI Canvas + CoreMIDI note-on/off
-4. **Patch compare / morph / randomizer** — pure parameter operations, no synth needed
+4. **App icon** — design + asset catalog
