@@ -76,7 +76,6 @@ Before using the app, enable SysEx on the synthesizer itself:
 VZenit/
 ├── README.md                      ← Project overview
 ├── SETUP.md                       ← You are here
-├── STATUS.md                      ← Feature/roadmap status
 ├── project.yml                    ← XcodeGen spec (regenerates .xcodeproj)
 ├── VZenit.entitlements            ← Generated; App Sandbox + USB + Audio Input
 ├── VZenit.xcodeproj               ← Generated; ignored by git

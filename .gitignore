@@ -9,6 +9,9 @@ Icon?
 *.xcodeproj/
 VZenit.entitlements
 
+# Internal/local-only docs
+STATUS.md
+
 # Xcode — user-specific
 xcuserdata/
 *.xcuserstate

@@ -4,7 +4,7 @@ A native macOS voice editor and SysEx librarian for the **Casio VZ-1**, **VZ-10M
 
 Built in Swift / SwiftUI. No dependencies. Bit-accurate handling of the full 336-byte VZ voice format, verified against Casio's official spec.
 
-> **Status:** Source code complete for the core editor; Xcode project setup is manual (see [SETUP.md](SETUP.md)). See [STATUS.md](STATUS.md) for a full feature breakdown.
+> **Status:** Source code complete for the core editor; 28 unit tests passing; first preview cut as [v0.0.1](https://github.com/iraaron/VZenit/releases/tag/v0.0.1) (hardware-untested). Build instructions in [SETUP.md](SETUP.md).
 
 ---
 
@@ -41,25 +41,24 @@ In Xcode, set your Team under **Signing & Capabilities**, then **⌘R**. Full wa
 VZenit/
 ├── README.md                 ← you are here
 ├── SETUP.md                  ← detailed setup walkthrough
-├── STATUS.md                 ← feature/roadmap status
 ├── project.yml               ← XcodeGen spec — single source of truth
-└── Sources/VZenit/
-    ├── App/                  ← @main entry point + root view
-    ├── Models/               ← 336-byte voice model, SysEx codec, library
-    ├── MIDI/                 ← CoreMIDI wrapper, SysEx streaming
-    └── Views/                ← Voice editor, envelope editor
+├── Sources/VZenit/
+│   ├── App/                  ← @main entry point + root view
+│   ├── Models/               ← 336-byte voice model, SysEx codec, randomizer, library
+│   ├── MIDI/                 ← CoreMIDI wrapper, SysEx streaming
+│   └── Views/                ← Voice editor, envelope editor
+└── Tests/VZenitTests/        ← 28 unit tests
 ```
 
 ## Roadmap
 
-Highlights from [STATUS.md](STATUS.md):
-
 - Operation editor (multi-timbral mode)
 - On-screen MIDI keyboard preview
+- Patch compare / morph
 - Undo/redo
 - 64-patch bank dump/restore
-- Patch compare / morph
-- Unit tests
+- App icon
+- Hardware verification on real VZ-1 / VZ-10M / VZ-8M units
 
 ## Acknowledgements
 
