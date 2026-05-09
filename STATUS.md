@@ -1,6 +1,6 @@
 # VZenit — Project Status
 
-**Last updated:** 2026-05-09  
+**Last updated:** 2026-05-09 (model defaults reconciled)  
 **Target platform:** macOS 14+ (native Swift/SwiftUI)  
 **Synths supported:** Casio VZ-1, VZ-10M, VZ-8M
 
@@ -92,8 +92,15 @@
 
 ### Tests (`Tests/VZenitTests/`)
 - `VZenitTests` XCTest bundle target wired up via `project.yml`
-- 21 tests covering: dump-request frames, encode framing, encode-decode-encode byte idempotence, custom name + waveform + line-mode + octave + master-level round-trips, multi-message stream extraction, decode error paths
-- Caught two real issues during test authoring (see notes below)
+- 22 tests covering: dump-request frames, encode framing, encode-decode-encode byte idempotence, **full-struct round-trip equality on the default patch**, custom name + waveform + line-mode + octave + master-level round-trips, multi-message stream extraction, decode error paths
+- Caught (and fixed) the dump-request command-byte bug during test authoring
+
+### Model defaults reconciled with wire format
+- `VZEnvelope.depth` default 99 → 0 (the field is a 6-bit value 0–63 on the wire, only meaningful for the DCO pitch envelope; DCA envelopes don't encode it at all)
+- `VZEnvelope.steps[7].isEnd` default false → true (decoder marks the step at `endStep` with `isEnd=true`; default constructor now matches that canonical post-decode form)
+- `VZVoicePatch.dcoKeyFollowCurve` overridden to `.flat(value: 0)` (the DCO key follow's value field is 6-bit; the previous shared default of 99 clamped to 35 on encode)
+- `VZVoicePatch.name` default trailing spaces dropped (decoder trims, so the trailing whitespace was lost on the first round-trip)
+- New `VZKeyFollowCurve.flat(value:)` factory for explicit flat curves
 
 ---
 
@@ -109,8 +116,6 @@
 | **Randomizer** | Constrained random patch generation |
 | **Accessibility** | VoiceOver labels, keyboard navigation for all controls |
 | **App icon** | Design and asset catalog |
-| **Reconcile model defaults vs wire format** | Default `dcoPitchEnvelope.depth = 99` and key-follow values of 99 get clamped to 35 on encode (6-bit field on the pitch path). Either tighten model defaults to match the wire format, or normalise on decode. Encode is idempotent at the byte level — no data loss across save/load — but full struct equality across a round-trip currently fails. |
-| **Reconcile envelope `isEnd` flag** | Decoder marks the step at `endStep` with `isEnd = true`; default constructor doesn't. Same idempotence story as above. |
 | **Modernise `onChange` in ContentView** | Migrate from deprecated `onChange(of:perform:)` to two-arg form (warnings only, not blocking) |
 | **VZ-8M verification** | Confirm operation data format differences vs VZ-1/10M |
 
@@ -139,7 +144,7 @@ VZenit/
 │       ├── VoiceEditorView.swift          ✅ routing diagram + DCO/DCA editors
 │       └── EnvelopeEditorView.swift       ✅ canvas envelope + key follow
 └── Tests/VZenitTests/
-    └── VZSysExTests.swift                 ✅ 21 codec tests
+    └── VZSysExTests.swift                 ✅ 22 codec tests
 ```
 
 ---
@@ -147,6 +152,6 @@ VZenit/
 ## Next Session Suggested Starting Points
 
 1. **Operation Editor** — the operation SysEx format is structurally similar to voice; `VZ operation creation.txt` in the reference repo has the spec
-2. **Reconcile model defaults vs wire format** — the open issue surfaced by the test suite (see Not Yet Started)
+2. **Modernise `onChange(of:perform:)` in `ContentView.swift`** — kills the three deprecation warnings; ~10-minute task
 3. **On-screen keyboard** — straightforward SwiftUI Canvas + CoreMIDI note-on/off
-4. **Unit tests** — write `VZSysExTests` covering encode → decode round-trips for known patches
+4. **Patch compare / morph / randomizer** — pure parameter operations, no synth needed

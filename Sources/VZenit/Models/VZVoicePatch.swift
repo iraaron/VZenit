@@ -99,11 +99,17 @@ struct VZEnvelopeStep: Codable, Equatable {
     var isEnd: Bool = false
 }
 
-/// An 8-step envelope (used for both DCA per-module and global DCO pitch)
+/// An 8-step envelope. Used for both per-module DCA envelopes and the global DCO pitch envelope.
+/// `depth` is only meaningful for the DCO pitch envelope (where it occupies a 6-bit field 0–63
+/// on the wire); DCA envelopes don't encode it at all.
 struct VZEnvelope: Codable, Equatable {
-    var steps: [VZEnvelopeStep] = Array(repeating: VZEnvelopeStep(), count: 8)
-    /// Overall envelope depth (0–127)
-    var depth: UInt8 = 99
+    var steps: [VZEnvelopeStep] = {
+        var s = Array(repeating: VZEnvelopeStep(), count: 8)
+        s[7].isEnd = true   // matches default endStep = 7 so encode→decode round-trips cleanly
+        return s
+    }()
+    /// Pitch-envelope depth (0–63 on the wire). Ignored for DCA envelopes.
+    var depth: UInt8 = 0
     /// Index of the end step (0–7)
     var endStep: UInt8 = 7
 
@@ -131,7 +137,9 @@ struct VZKeyFollowPoint: Codable, Equatable {
     var value: UInt8 = 99
 }
 
-/// 6-point breakpoint curve used for key follow (DCA level and DCO pitch)
+/// 6-point breakpoint curve used for key follow (DCA level and DCO pitch).
+/// DCA + global rate curves carry 7-bit values (0–127); the DCO key follow's value field is
+/// 6-bit (0–63) on the wire, so DCO defaults must stay within that range.
 struct VZKeyFollowCurve: Codable, Equatable {
     var points: [VZKeyFollowPoint] = [
         VZKeyFollowPoint(key: 0,   value: 99),
@@ -141,6 +149,13 @@ struct VZKeyFollowCurve: Codable, Equatable {
         VZKeyFollowPoint(key: 96,  value: 99),
         VZKeyFollowPoint(key: 120, value: 99),
     ]
+
+    /// A flat 6-point curve at the given value (key positions 0, 24, 48, 72, 96, 120).
+    static func flat(value: UInt8) -> VZKeyFollowCurve {
+        VZKeyFollowCurve(points: (0..<6).map {
+            VZKeyFollowPoint(key: UInt8($0 * 24), value: value)
+        })
+    }
 }
 
 // MARK: - Module Components
@@ -243,8 +258,9 @@ struct VZVoicePatch: Codable, Equatable, Identifiable {
     var id: UUID = UUID()
 
     // MARK: Voice identity
-    /// Up to 12 ASCII characters (truncated/padded on encode)
-    var name: String = "INIT VOICE  "
+    /// Up to 12 ASCII characters. The encoder pads short names with spaces; the decoder trims
+    /// trailing spaces, so the round-trip representation has no trailing whitespace.
+    var name: String = "INIT VOICE"
     var description: String = ""
     var group: String = ""
     var synth: VZSynthModel = .vz10m
@@ -264,7 +280,9 @@ struct VZVoicePatch: Codable, Equatable, Identifiable {
     var dcoPitchEnvelope: VZEnvelope = VZEnvelope()
     /// Range multiplier for the DCO pitch envelope
     var dcoPitchEnvelopeRange: Bool = false
-    var dcoKeyFollowCurve: VZKeyFollowCurve = VZKeyFollowCurve()
+    /// 6-bit value field on the wire — defaults to a flat curve at 0 so the model survives
+    /// a SysEx round-trip (the standard 99-valued curve would clamp to 35 on encode).
+    var dcoKeyFollowCurve: VZKeyFollowCurve = .flat(value: 0)
     var dcoKeyVelocityCurve: UInt8 = 0
     var dcoKeyVelocitySensitivity: UInt8 = 0
 

@@ -66,15 +66,26 @@ final class VZSysExTests: XCTestCase {
     // MARK: - Round-trip
 
     func testEncodeIsIdempotentOnBytes() throws {
-        // Stronger invariant than full-struct equality: encode → decode → encode
-        // must produce the same bytes. (Full equality fails because the model's
-        // default values for some fields — e.g. dcoPitchEnvelope.depth, key-follow
-        // values — exceed the wire format's bit width and get clamped on encode;
-        // the round-trip converges to the clamped form. Tracked in STATUS.md.)
+        // Sanity check: encode → decode → encode produces the same bytes regardless of
+        // whether the model defaults match the wire format.
         let bytes1 = VZSysEx.encode(VZVoicePatch())
         let decoded = try VZSysEx.decode(bytes1)
         let bytes2 = VZSysEx.encode(decoded)
         XCTAssertEqual(bytes1, bytes2)
+    }
+
+    func testDefaultPatchRoundTripsToEqualStruct() throws {
+        // The full-equality version of the round-trip: requires that VZVoicePatch's defaults
+        // sit within the wire format's bit widths and match the canonical post-decode form
+        // (e.g. envelope step at endStep is marked isEnd=true; dcoKeyFollowCurve values fit
+        // in 6 bits; trailing spaces aren't part of the default name).
+        let original = VZVoicePatch()
+        var decoded = try VZSysEx.decode(VZSysEx.encode(original))
+        // Runtime/library metadata that's not part of the 336-byte wire format.
+        decoded.id = original.id
+        decoded.description = original.description
+        decoded.group = original.group
+        XCTAssertEqual(decoded, original)
     }
 
     func testCustomNameRoundTrips() throws {
