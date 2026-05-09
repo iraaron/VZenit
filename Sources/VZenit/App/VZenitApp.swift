@@ -6,8 +6,9 @@ import SwiftUI
 @main
 struct VZenitApp: App {
 
-    @StateObject private var library = VZLibraryManager()
-    @StateObject private var midi    = MIDIManager.shared
+    @StateObject private var library       = VZLibraryManager()
+    @StateObject private var midi          = MIDIManager.shared
+    @StateObject private var updateChecker = UpdateChecker.shared
 
     var body: some Scene {
 
@@ -15,7 +16,9 @@ struct VZenitApp: App {
             ContentView()
                 .environmentObject(library)
                 .environmentObject(midi)
+                .environmentObject(updateChecker)
                 .frame(minWidth: 1000, minHeight: 700)
+                .task { updateChecker.checkIfDue() }
         }
         .windowStyle(.titleBar)
         .windowToolbarStyle(.unified(showsTitle: true))

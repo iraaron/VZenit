@@ -7,8 +7,9 @@ import SwiftUI
 
 struct ContentView: View {
 
-    @EnvironmentObject var library: VZLibraryManager
-    @EnvironmentObject var midi:    MIDIManager
+    @EnvironmentObject var library:       VZLibraryManager
+    @EnvironmentObject var midi:          MIDIManager
+    @EnvironmentObject var updateChecker: UpdateChecker
 
     @State private var selectedPatchID: UUID?        = nil
     @State private var editorTab: EditorTab          = .voice
@@ -16,6 +17,7 @@ struct ContentView: View {
     @State private var showImportSheet               = false
     @State private var showExportSheet               = false
     @State private var alertMessage: String?         = nil
+    @State private var updateBannerDismissed         = false
 
     // The patch currently being edited (copy-on-change, sent when auto-update is on)
     @State private var editingPatch: VZVoicePatch?   = nil
@@ -30,10 +32,15 @@ struct ContentView: View {
     // MARK: - Body
 
     var body: some View {
-        NavigationSplitView {
-            libraryPanel
-        } detail: {
-            editorPanel
+        VStack(spacing: 0) {
+            if let update = updateChecker.availableUpdate, !updateBannerDismissed {
+                UpdateBannerView(update: update) { updateBannerDismissed = true }
+            }
+            NavigationSplitView {
+                libraryPanel
+            } detail: {
+                editorPanel
+            }
         }
         .toolbar { toolbar }
         .sheet(isPresented: $showMIDISheet) { MIDISettingsSheet() }
