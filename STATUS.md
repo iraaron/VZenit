@@ -92,8 +92,15 @@
 
 ### Tests (`Tests/VZenitTests/`)
 - `VZenitTests` XCTest bundle target wired up via `project.yml`
-- 22 tests covering: dump-request frames, encode framing, encode-decode-encode byte idempotence, **full-struct round-trip equality on the default patch**, custom name + waveform + line-mode + octave + master-level round-trips, multi-message stream extraction, decode error paths
+- **28 tests** across two suites: codec correctness (22) + randomizer (6)
+- Codec coverage: dump-request frames, encode framing, encode-decode-encode byte idempotence, full-struct round-trip equality on the default patch, custom name + waveform + line-mode + octave + master-level round-trips, multi-message stream extraction, all four decode error paths
+- Randomizer coverage: determinism with seeded RNG, distinctness across seeds, **property test that any random patch round-trips losslessly** (catches range violations the randomizer might introduce), envelope structure invariants, master-level audibility
 - Caught (and fixed) the dump-request command-byte bug during test authoring
+
+### Patch randomizer (`VZVoicePatch+Random.swift`)
+- `VZVoicePatch.random(using:)` — constrained random patch generation, generic over `RandomNumberGenerator` so tests can use a seeded LCG
+- Covers timbre-shaping fields: per-module waveform/detune/harmonic/fixed-pitch, DCA envelope (rates + levels + one sustain step), line combination modes (biased toward Mix), vibrato/tremolo depth, master level (audible range), octave
+- Wired into the library sidebar via a 🎲 die.face.5 button next to `+`
 
 ### Model defaults reconciled with wire format
 - `VZEnvelope.depth` default 99 → 0 (the field is a 6-bit value 0–63 on the wire, only meaningful for the DCO pitch envelope; DCA envelopes don't encode it at all)
@@ -113,7 +120,6 @@
 | **Undo / Redo** | SwiftUI `UndoManager` integration on `VZVoicePatch` mutations |
 | **64-patch bank management** | VZ-1 has 64 internal preset slots; bulk dump/restore |
 | **Patch compare / morph** | Side-by-side diff or parameter interpolation between two patches |
-| **Randomizer** | Constrained random patch generation |
 | **Accessibility** | VoiceOver labels, keyboard navigation for all controls |
 | **App icon** | Design and asset catalog |
 | **VZ-8M verification** | Confirm operation data format differences vs VZ-1/10M |
@@ -135,6 +141,7 @@ VZenit/
 │   │   └── ContentView.swift              ✅ root 3-panel layout
 │   ├── Models/
 │   │   ├── VZVoicePatch.swift             ✅ 336-byte voice data model
+│   │   ├── VZVoicePatch+Random.swift      ✅ constrained patch randomizer
 │   │   ├── VZSysEx.swift                  ✅ bit-accurate encode/decode
 │   │   └── VZLibrary.swift                ✅ JSON library + .syx import/export
 │   ├── MIDI/
@@ -143,7 +150,8 @@ VZenit/
 │       ├── VoiceEditorView.swift          ✅ routing diagram + DCO/DCA editors
 │       └── EnvelopeEditorView.swift       ✅ canvas envelope + key follow
 └── Tests/VZenitTests/
-    └── VZSysExTests.swift                 ✅ 22 codec tests
+    ├── VZSysExTests.swift                 ✅ 22 codec tests
+    └── VZVoicePatchRandomTests.swift      ✅ 6 randomizer tests
 ```
 
 ---
@@ -151,6 +159,6 @@ VZenit/
 ## Next Session Suggested Starting Points
 
 1. **Operation Editor** — the operation SysEx format is structurally similar to voice; `VZ operation creation.txt` in the reference repo has the spec
-2. **Patch compare / morph / randomizer** — pure parameter operations, no synth needed
+2. **Patch compare / morph** — extends the randomizer pattern: pure operations on `VZVoicePatch`, no synth needed
 3. **On-screen keyboard** — straightforward SwiftUI Canvas + CoreMIDI note-on/off
 4. **App icon** — design + asset catalog

@@ -84,6 +84,8 @@ struct ContentView: View {
                 Text(library.metadata.name)
                     .font(.headline)
                 Spacer()
+                Button { library.add(VZVoicePatch.random()) } label: { Image(systemName: "die.face.5") }
+                    .help("Add random patch")
                 Button { library.add(VZVoicePatch()) } label: { Image(systemName: "plus") }
                     .help("Add new patch")
             }
