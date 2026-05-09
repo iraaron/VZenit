@@ -13,6 +13,9 @@ final class UpdateChecker: ObservableObject {
     static let shared = UpdateChecker()
 
     @Published private(set) var availableUpdate: UpdateInfo?
+    /// Set after a manual (menu-triggered) check completes with no update or an error.
+    /// The banner already covers the "update available" case; this is for the silent cases.
+    @Published var manualCheckMessage: String?
 
     private let logger = Logger(subsystem: "io.github.iraaron.VZenit", category: "UpdateChecker")
     private let releasesURL = URL(string: "https://api.github.com/repos/iraaron/VZenit/releases/latest")!
@@ -21,7 +24,7 @@ final class UpdateChecker: ObservableObject {
 
     private init() {}
 
-    /// Trigger a check if enough time has passed since the last one.
+    /// Trigger a check if enough time has passed since the last one (called on launch).
     func checkIfDue() {
         let lastCheck = UserDefaults.standard.object(forKey: lastCheckKey) as? Date
         if let lastCheck, Date().timeIntervalSince(lastCheck) < minCheckInterval {
@@ -31,7 +34,12 @@ final class UpdateChecker: ObservableObject {
         Task { await self.check() }
     }
 
-    func check() async {
+    /// Force a check regardless of rate limit, with user-visible feedback (called from Help menu).
+    func checkManually() {
+        Task { await self.check(triggeredManually: true) }
+    }
+
+    func check(triggeredManually: Bool = false) async {
         UserDefaults.standard.set(Date(), forKey: lastCheckKey)
 
         var request = URLRequest(url: releasesURL, timeoutInterval: 8)
@@ -42,6 +50,9 @@ final class UpdateChecker: ObservableObject {
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
                 logger.warning("Update check non-200 response")
+                if triggeredManually {
+                    manualCheckMessage = "Couldn't reach the update server (HTTP \((response as? HTTPURLResponse)?.statusCode ?? 0)). Try again later."
+                }
                 return
             }
             let release = try JSONDecoder().decode(GitHubRelease.self, from: data)
@@ -53,11 +64,18 @@ final class UpdateChecker: ObservableObject {
                     url: URL(string: release.html_url) ?? releasesURL
                 )
                 logger.info("Update available: \(latestVersion)")
+                // No alert — the banner handles this case.
             } else {
                 availableUpdate = nil
+                if triggeredManually {
+                    manualCheckMessage = "VZenit \(Self.currentVersion) is the latest version."
+                }
             }
         } catch {
             logger.warning("Update check failed: \(error.localizedDescription)")
+            if triggeredManually {
+                manualCheckMessage = "Couldn't check for updates: \(error.localizedDescription)"
+            }
         }
     }
 

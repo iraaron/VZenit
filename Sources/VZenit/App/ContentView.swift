@@ -52,6 +52,18 @@ struct ContentView: View {
         } message: {
             Text(alertMessage ?? "")
         }
+        .alert("Check for Updates", isPresented: .init(
+            get: { updateChecker.manualCheckMessage != nil },
+            set: { if !$0 { updateChecker.manualCheckMessage = nil } }
+        )) {
+            Button("OK") { updateChecker.manualCheckMessage = nil }
+        } message: {
+            Text(updateChecker.manualCheckMessage ?? "")
+        }
+        .onChange(of: updateChecker.availableUpdate) { _, _ in
+            // A new check found something — un-dismiss the banner so the user sees it.
+            updateBannerDismissed = false
+        }
         .onReceive(NotificationCenter.default.publisher(for: .importSysEx)) { _ in
             showImportSheet = true
         }

@@ -45,6 +45,11 @@ struct VZenitApp: App {
                 Divider()
                 Button("Refresh MIDI Ports") { midi.refreshEndpoints() }
             }
+
+            // Help menu
+            CommandGroup(replacing: .help) {
+                Button("Check for Updates…") { updateChecker.checkManually() }
+            }
         }
     }
 }
