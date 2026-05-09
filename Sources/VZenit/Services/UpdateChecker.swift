@@ -19,7 +19,10 @@ final class UpdateChecker: ObservableObject {
 
     private let logger = Logger(subsystem: "io.github.iraaron.VZenit", category: "UpdateChecker")
     private let releasesURL = URL(string: "https://api.github.com/repos/iraaron/VZenit/releases/latest")!
-    private let lastCheckKey = "VZenitLastUpdateCheck"
+    /// Version-namespaced so each install gets a fresh check. cfprefsd was holding
+    /// a stale timestamp from a failed-API launch in memory across runs, which kept
+    /// triggering the rate-limit bail-out indefinitely.
+    private var lastCheckKey: String { "VZenitLastUpdateCheck-v\(Self.currentVersion)" }
     private let minCheckInterval: TimeInterval = 60 * 60 * 6  // 6 hours
 
     private init() {}
