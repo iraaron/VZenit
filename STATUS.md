@@ -1,7 +1,7 @@
 # VZenit — Project Status
 
-**Last updated:** 2026-05-08  
-**Target platform:** macOS 13+ (native Swift/SwiftUI)  
+**Last updated:** 2026-05-09  
+**Target platform:** macOS 14+ (native Swift/SwiftUI)  
 **Synths supported:** Casio VZ-1, VZ-10M, VZ-8M
 
 ---
@@ -78,12 +78,17 @@
 - Refresh button for hot-plug scenarios
 
 ### Setup Guide (`SETUP.md`)
-- Step-by-step Xcode project creation
-- Entitlements configuration (App Sandbox + USB)
+- XcodeGen-based project setup (`brew install xcodegen && xcodegen generate`)
+- Entitlements auto-generated from `project.yml` (App Sandbox + USB + Audio Input)
 - VZ synth SysEx enable instructions (per model)
 - Usage workflow (receive, edit, send, save)
 - SysEx frame reference
 - Architecture rationale table
+
+### Build (`project.yml`, MIT `LICENSE`)
+- XcodeGen spec defines the macOS 14+ app target, bundle ID `io.github.iraaron.VZenit`, App Sandbox + USB + Audio Input entitlements
+- Verified to build cleanly with `xcodebuild` (only deprecation warnings around legacy `onChange(of:perform:)` calls in `ContentView.swift`)
+- MIT license, public repo at https://github.com/iraaron/VZenit
 
 ---
 
@@ -99,8 +104,8 @@
 | **Randomizer** | Constrained random patch generation |
 | **Accessibility** | VoiceOver labels, keyboard navigation for all controls |
 | **Unit tests** | SysEx round-trip tests, bit-mask regression tests |
-| **Xcode project file** | `.xcodeproj` / `Package.swift` — currently manual setup per SETUP.md |
 | **App icon** | Design and asset catalog |
+| **Modernise `onChange` in ContentView** | Migrate from deprecated `onChange(of:perform:)` to two-arg form (warnings only, not blocking) |
 | **VZ-8M verification** | Confirm operation data format differences vs VZ-1/10M |
 
 ---
@@ -109,8 +114,11 @@
 
 ```
 VZenit/
-├── STATUS.md                               ← this file
-├── SETUP.md                                ← Xcode setup instructions
+├── README.md                              ← project overview
+├── STATUS.md                              ← this file
+├── SETUP.md                               ← detailed setup walkthrough
+├── LICENSE                                ← MIT
+├── project.yml                            ← XcodeGen spec
 └── Sources/VZenit/
     ├── App/
     │   ├── VZenitApp.swift               ✅ @main, menus, notifications

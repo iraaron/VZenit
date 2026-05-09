@@ -74,15 +74,15 @@ final class MIDIManager: ObservableObject {
     private func setupMIDI() {
         // Create MIDI client with a setup-change notification block.
         // Capture `self` weakly; the block may fire on any thread so dispatch to main.
-        let status = MIDIClientCreateWithBlock("VZenit" as CFString, &client) { [weak self] notifPtr in
+        let clientStatus = MIDIClientCreateWithBlock("VZenit" as CFString, &client) { [weak self] notifPtr in
             let msgID = notifPtr.pointee.messageID
             if msgID == .msgSetupChanged || msgID == .msgObjectAdded || msgID == .msgObjectRemoved {
                 DispatchQueue.main.async { self?.refreshEndpoints() }
             }
         }
 
-        guard status == noErr else {
-            self.status = "MIDI client error: \(status)"
+        guard clientStatus == noErr else {
+            self.status = "MIDI client error: \(clientStatus)"
             return
         }
 

@@ -5,6 +5,10 @@
 Icon?
 ._*
 
+# XcodeGen — generated artifacts (regenerate with `xcodegen generate`)
+*.xcodeproj/
+VZenit.entitlements
+
 # Xcode — user-specific
 xcuserdata/
 *.xcuserstate

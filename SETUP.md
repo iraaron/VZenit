@@ -6,73 +6,41 @@ A native macOS SwiftUI app for editing and SysEx-dumping patches on the **Casio 
 
 ## Prerequisites
 
-- macOS 13 Ventura or later
+- macOS 14 Sonoma or later
 - Xcode 15 or later (free from the Mac App Store)
+- [XcodeGen](https://github.com/yonaskolb/XcodeGen) — `brew install xcodegen`
 - A USB-MIDI interface connected to your VZ synth's MIDI IN/OUT
 
 ---
 
-## Xcode Project Setup
+## Generating the Xcode Project
 
-The source files are already written. You just need to create an Xcode project and add them.
+The repo doesn't commit the `.xcodeproj` — it's regenerated from `project.yml` via XcodeGen. This keeps the project definition merge-friendly and easy to change.
 
-### Step 1 — Create a new macOS App project
-
-1. Open Xcode → **File → New → Project**
-2. Choose **macOS → App**
-3. Configure:
-   - **Product Name**: `VZenit`
-   - **Bundle Identifier**: `com.yourname.VZenit` (change to whatever you like)
-   - **Interface**: SwiftUI
-   - **Language**: Swift
-4. Save the project **inside** the `VZenit/` folder (next to `Sources/`).
-
-### Step 2 — Add the source files
-
-1. In the Xcode Project Navigator, right-click the `VZenit` group → **Add Files to "VZenit"…**
-2. Navigate to `Sources/VZenit/` and select all sub-folders:
-   - `App/`
-   - `Models/`
-   - `MIDI/`
-   - `Views/`
-3. Make sure **"Add to target: VZenit"** is checked, then click **Add**.
-4. Delete the template `ContentView.swift` and `VZenitApp.swift` that Xcode generated (the ones in `Sources/VZenit/App/` replace them).
-
-### Step 3 — Configure entitlements
-
-VZenit needs permission to access MIDI hardware. In the Project Navigator:
-
-1. Select your project → target **VZenit** → tab **Signing & Capabilities**
-2. Click **+ Capability** and add **App Sandbox**
-3. Under **Hardware**, enable:
-   - ✅ **USB**  ← required for USB-MIDI interfaces
-   - ✅ **Audio Input** ← some MIDI drivers need this
-
-Alternatively, for development you can temporarily **disable** App Sandbox entirely (the app will still run).
-
-Your `.entitlements` file should contain at minimum:
-
-```xml
-<key>com.apple.security.app-sandbox</key>
-<true/>
-<key>com.apple.security.device.usb</key>
-<true/>
+```bash
+git clone git@github.com:iraaron/VZenit.git
+cd VZenit
+brew install xcodegen      # one time
+xcodegen generate
+open VZenit.xcodeproj
 ```
 
-### Step 4 — Enable SysEx on your VZ synth
+XcodeGen produces both `VZenit.xcodeproj` and `VZenit.entitlements` (with App Sandbox + USB + Audio Input enabled). To change the bundle ID, deployment target, or capabilities, edit `project.yml` and regenerate.
+
+### Set your development team
+
+In Xcode, select the **VZenit** target → **Signing & Capabilities** → set **Team** to your Apple ID (the free Personal Team is fine for local builds). Then **⌘R** to build and run.
+
+The first launch will ask for permission to access MIDI devices — click **Allow**.
+
+---
+
+## Enable SysEx on your VZ synth
 
 Before using the app, enable SysEx on the synthesizer itself:
 
 - **VZ-1**: Press **EDIT** → navigate to menu **3-04** → set SysEx to **ON**
 - **VZ-10M / VZ-8M**: Enter the System menu and enable **SysEx Receive/Transmit**
-
----
-
-## Building & Running
-
-Press **⌘R** in Xcode to build and run.
-
-The first launch may ask for permission to access MIDI devices — click **Allow**.
 
 ---
 
@@ -106,7 +74,12 @@ The first launch may ask for permission to access MIDI devices — click **Allow
 
 ```
 VZenit/
-├── SETUP.md                        ← You are here
+├── README.md                      ← Project overview
+├── SETUP.md                       ← You are here
+├── STATUS.md                      ← Feature/roadmap status
+├── project.yml                    ← XcodeGen spec (regenerates .xcodeproj)
+├── VZenit.entitlements            ← Generated; App Sandbox + USB + Audio Input
+├── VZenit.xcodeproj               ← Generated; ignored by git
 └── Sources/VZenit/
     ├── App/
     │   ├── VZenitApp.swift       ← @main entry point, menu commands

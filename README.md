@@ -18,21 +18,31 @@ Built in Swift / SwiftUI. No dependencies. Bit-accurate handling of the full 336
 
 ## Requirements
 
-- macOS 13 Ventura or later
+- macOS 14 Sonoma or later
 - Xcode 15+ (to build)
+- [XcodeGen](https://github.com/yonaskolb/XcodeGen) — `brew install xcodegen`
 - A USB-MIDI interface connected to your VZ synth
 
 ## Getting started
 
-The repo contains source files; you create the Xcode project. Walkthrough in [SETUP.md](SETUP.md).
+```bash
+git clone git@github.com:iraaron/VZenit.git
+cd VZenit
+brew install xcodegen      # one time
+xcodegen generate
+open VZenit.xcodeproj
+```
+
+In Xcode, set your Team under **Signing & Capabilities**, then **⌘R**. Full walkthrough in [SETUP.md](SETUP.md).
 
 ## Project layout
 
 ```
 VZenit/
 ├── README.md                 ← you are here
-├── SETUP.md                  ← Xcode project setup walkthrough
-├── STATUS.md                 ← detailed feature/roadmap status
+├── SETUP.md                  ← detailed setup walkthrough
+├── STATUS.md                 ← feature/roadmap status
+├── project.yml               ← XcodeGen spec — single source of truth
 └── Sources/VZenit/
     ├── App/                  ← @main entry point + root view
     ├── Models/               ← 336-byte voice model, SysEx codec, library

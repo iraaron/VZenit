@@ -1,0 +1,38 @@
+name: VZenit
+
+options:
+  bundleIdPrefix: io.github.iraaron
+  deploymentTarget:
+    macOS: "14.0"
+  developmentLanguage: en
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    GENERATE_INFOPLIST_FILE: YES
+    ENABLE_HARDENED_RUNTIME: YES
+    CODE_SIGN_STYLE: Automatic
+
+targets:
+  VZenit:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Sources/VZenit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.iraaron.VZenit
+        PRODUCT_NAME: VZenit
+        INFOPLIST_KEY_CFBundleDisplayName: VZenit
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.music
+        INFOPLIST_KEY_NSHumanReadableCopyright: "Copyright © 2026 Aaron Thornton"
+    entitlements:
+      path: VZenit.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.device.usb: true
+        com.apple.security.device.audio-input: true
