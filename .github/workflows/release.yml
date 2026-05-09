@@ -36,7 +36,10 @@ jobs:
         with:
           files: dist/VZenit-${{ steps.version.outputs.version }}.zip
           generate_release_notes: true
-          prerelease: ${{ startsWith(github.ref_name, 'v0.') }}
+          # Releases are NOT marked prerelease — GitHub's /releases/latest
+          # endpoint excludes prereleases, which would silently break the
+          # in-app update check. The "Hardware-untested preview" disclaimer
+          # in the release notes carries the maturity warning instead.
           body: |
             **Hardware-untested preview build.** Unsigned, not notarized.
 
