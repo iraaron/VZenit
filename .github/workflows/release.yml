@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write  # needed to create the GitHub release
+
+jobs:
+  release:
+    name: Build & publish
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify tag matches project.yml version
+        id: version
+        run: |
+          PROJECT_VERSION=$(grep -E '^\s+MARKETING_VERSION:' project.yml | head -1 | sed -E 's/.*"([^"]+)".*/\1/')
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [[ "$PROJECT_VERSION" != "$TAG_VERSION" ]]; then
+            echo "::error::Tag $GITHUB_REF_NAME (v$TAG_VERSION) does not match project.yml MARKETING_VERSION ($PROJECT_VERSION). Bump MARKETING_VERSION before tagging."
+            exit 1
+          fi
+          echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Build release zip
+        run: ./scripts/release.sh
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/VZenit-${{ steps.version.outputs.version }}.zip
+          generate_release_notes: true
+          prerelease: ${{ startsWith(github.ref_name, 'v0.') }}
+          body: |
+            **Hardware-untested preview build.** Unsigned, not notarized.
+
+            ### Install
+
+            1. Download `VZenit-${{ steps.version.outputs.version }}.zip` below.
+            2. Unzip and drag `VZenit.app` to `/Applications`.
+            3. macOS will quarantine the download — either right-click `VZenit.app` → **Open** in Finder and confirm the Gatekeeper dialog, or run:
+
+            ```bash
+            xattr -cr /Applications/VZenit.app && open /Applications/VZenit.app
+            ```
+
+            After the first launch it'll start normally.
